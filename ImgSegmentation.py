@@ -3,27 +3,24 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-import os
 from IPython.core.display import display_pretty
 from IPython.display import Image, display
 
 import tensorflow as tf
-from keras.preprocessing.image import load_img
 
 import PIL
 from PIL import ImageOps
+
 from tensorflow import keras
 from tensorflow.keras import layers
-import random, copy
-
-from tensorflow.keras import layers
+from tensorflow.keras.preprocessing.image import load_img
 from tensorflow.keras.models import load_model
 
-
+import random, copy
 import numpy as np
-import pandas as pd
-import tensorflow as tf
 import time,os, math
+
+print(tf.config.list_physical_devices('GPU'))
 
 # GPU Setting
 gpus = tf.config.experimental.list_physical_devices('GPU')
@@ -39,12 +36,12 @@ if gpus:
 
 
 # 전역변수
-img_size = (128, 128)
+img_size = (512, 512)
 ## Hyperparam
-epochs = 7000
+epochs = 200
 num_classes = 3
-batch_size = 64
-val_samples = 4
+batch_size = 2
+val_samples = 2
 
 class DataPIH(keras.utils.Sequence):
   def __init__(self, batch_size, img_size, input_img_paths, target_img_paths):
@@ -104,7 +101,7 @@ def train_model(input_dir, target_dir, weight_save_path):
         ## 모델구성
         model = get_model(img_size, num_classes)
         model.summary()
-        model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics = ["accuracy"])#  sparse_categorical_crossentropy
+        model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'], run_eagerly=True)
 
         callbacks = [keras.callbacks.ModelCheckpoint("checkpoint/checkpointpview_segmentation.h5", save_best_only=True)]
 
@@ -190,16 +187,20 @@ def test_model(img_path, model_path):
 
   ## 추론 2.
   preds = model.predict(img)
-  img2 = display_mask(preds, 0)
+  prediceted_img = display_mask(preds, 0)
   
 
-  cv2.imshow("result_img", cv2.resize(img2, (width, height)))
+  cv2.imshow("result_img", cv2.resize(prediceted_img, (width, height)))
   cv2.waitKey(0)
 
 
 if __name__ == "__main__":
   input_dir = "data/img" # 입력데이터 디렉터리 경로
   target_dir = "data/preprocessed_mask" # 마스크 데이터 디렉터리 경로
+  
   train_model(input_dir, target_dir, "weight_231023_1.h5")
+  
 
-  # test_model("data/img/Abyssinian_1.jpg", "weight_231018_1.h5")
+  #test_data = "data/img/D5_03_1_1_Bright Field_002.jpg" # 테스트 데이터 파일 경로
+  # test_data = "Cardiac Dataset/Img/Bad/jpg/B3_03_1_1_Bright Field_001.jpg" # 테스트 데이터 파일 경로
+  # test_model(test_data, "weight_231023_1.h5")
