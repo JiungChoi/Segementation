@@ -1,0 +1,6 @@
+# ignore  files
+Cardiac Dataset/
+checkpoint/
+data/
+test_data/
+Cardiac Dataset.zip
